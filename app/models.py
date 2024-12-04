@@ -114,8 +114,8 @@ class Banner(Base):
     start_date = Column(Date, nullable=False)
     end_date = Column(Date, nullable=False)
     created_date = Column(DateTime, default=datetime.now())
-    banner_meta_title = Column(JSON, default=list)
-    images = Column(JSON, nullable=True, default=None)
+    banner_meta_title = Column(JSON, default=list, nullable=True)
+    images = Column(JSON, nullable=True, default=list)
     youtube_link = Column(JSON, default=list, nullable=True)
 
 

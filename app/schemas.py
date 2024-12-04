@@ -1,12 +1,27 @@
-from pydantic import BaseModel, EmailStr, Field
+from pydantic import BaseModel
 from datetime import datetime
 from typing import List, Optional
 
 
-#Schema for verifying username and password 
+#-----------------------------------------
+#Login schema
+#-----------------------------------------
 class LoginRequest(BaseModel):
     email: str
     password: str
+
+
+#-----------------------------------------
+#Reset password schema
+#-----------------------------------------
+
+class PasswordResetRequest(BaseModel):
+    email: str
+
+class PasswordReset(BaseModel):
+    token: str
+    new_password: str
+
 
 
 # Schema for creating a new department
@@ -33,6 +48,11 @@ class DepartmentResponse(BaseModel):
 class DepartmentUserId(BaseModel):
     userid: int
 
+
+#--------------------------------------------
+#UserManagement schema
+#--------------------------------------------
+
 class UserManagementBase(BaseModel):
     username: str
     emailid: str
@@ -43,9 +63,10 @@ class UserManagementBase(BaseModel):
 
 class UserManagementResponse(BaseModel):
     username: str
-    emailid: EmailStr
+    emailid: str
     departmentname: str
-    mobilenumber: str  
+    mobilenumber: str
+    userid: int
 
 class PermissionActions(BaseModel):
     view: bool
@@ -69,49 +90,57 @@ class PermissionBaseResponse(BaseModel):
 
     userid: int
     username: str
-    dashboard_view: bool = Field(default=False)
-    dashboard_create: bool = Field(default=False)
-    dashboard_update: bool = Field(default=False)
-    dashboard_delete: bool = Field(default=False)
-    dashboard_download: bool = Field(default=False)
+    dashboard_view: bool
+    dashboard_create: bool 
+    dashboard_update: bool 
+    dashboard_delete: bool 
+    dashboard_download: bool 
 
-    notification_view: bool = Field(default=False)
-    notification_create: bool = Field(default=False)
-    notification_update: bool = Field(default=False)
-    notification_delete: bool = Field(default=False)
-    notification_download: bool = Field(default=False)
+    notification_view: bool 
+    notification_create: bool 
+    notification_update: bool 
+    notification_delete: bool 
+    notification_download: bool
 
-    banner_view: bool = Field(default=False)
-    banner_create: bool = Field(default=False)
-    banner_update: bool = Field(default=False)
-    banner_delete: bool = Field(default=False)
-    banner_download: bool = Field(default=False)
+    banner_view: bool 
+    banner_create: bool 
+    banner_update: bool 
+    banner_delete: bool
+    banner_download: bool
 
-    reports_view: bool = Field(default=False)
-    reports_create: bool = Field(default=False)
-    reports_update: bool = Field(default=False)
-    reports_delete: bool = Field(default=False)
-    reports_download: bool = Field(default=False)
+    reports_view: bool
+    reports_create: bool
+    reports_update: bool
+    reports_delete: bool
+    reports_download: bool
 
-    logs_view: bool = Field(default=False)
-    logs_create: bool = Field(default=False)
-    logs_update: bool = Field(default=False)
-    logs_delete: bool = Field(default=False)
-    logs_download: bool = Field(default=False)
+    logs_view: bool
+    logs_create: bool
+    logs_update: bool
+    logs_delete: bool
+    logs_download: bool
 
-    usermanagement_view: bool = Field(default=False)
-    usermanagement_create: bool = Field(default=False)
-    usermanagement_update: bool = Field(default=False)
-    usermanagement_delete: bool = Field(default=False)
-    usermanagement_download: bool = Field(default=False)
+    usermanagement_view: bool 
+    usermanagement_create: bool
+    usermanagement_update: bool
+    usermanagement_delete: bool
+    usermanagement_download: bool
 
 class UserPermissions(BaseModel):
     data: UserManagementBase
     permissions : dict
 
 class UserManagementPermissionsResponse(BaseModel):
+    users: List[UserManagementResponse]
+    permissions: List[PermissionBaseResponse]
+
+
+class UserPermissionsItemResponse(BaseModel):
     user: UserManagementResponse
     permissions: PermissionBaseResponse
+
+class UserPermissionsUserId(BaseModel):
+    userid: int
 
 
 #---------------------------------------
@@ -191,9 +220,24 @@ class BannerBase(BaseModel):
     banner_type: str
     start_date: datetime
     end_date: datetime
-    banner_meta_title: list
+    banner_meta_title: list 
     youtube_link: list
-    files: list
+    images: list
 
 class BannerCreate(BannerBase):
     userid: int
+
+
+class BannerResponse(BaseModel):
+    banner_name: str
+    banner_type: str
+    start_date: datetime
+    end_date: datetime
+    banner_meta_title: list 
+    youtube_link: list
+    images: list
+    userid: int
+    id:int
+
+class BannerItemResponse(BannerResponse):
+    pass

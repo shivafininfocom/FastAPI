@@ -1,18 +1,17 @@
 import base64, os
+from typing import List
 from fastapi import APIRouter
 from datetime import datetime
-from fastapi import Depends, APIRouter, HTTPException, Request, status, FastAPI
+from fastapi import Depends, APIRouter, HTTPException, Request, status
 from fastapi.responses import JSONResponse
 from sqlalchemy.orm import Session
 from app.database import get_db
 from app.models import Banner
-from app.schemas import BannerCreate, DeleteBannerRequest
+from app.schemas import BannerCreate, DeleteBannerRequest, BannerResponse, BannerItemResponse
 from app.Endpoints.token_handler import get_current_user
 
 
 router_banner = APIRouter()
-
-app = FastAPI()
 
 
 
@@ -26,8 +25,8 @@ async def upload_banner_data(request: Request, db: Session = Depends(get_db), cu
         end_date = form_data.get("end_date")
         userid = form_data.get("userid")
         banner_meta_title = form_data.get("banner_meta_title", [])
-        youtube_link = form_data.get("youtube_links", [])
-        files = form_data.get("files", [])
+        youtube_link = form_data.get("youtube_link", [])
+        images = form_data.get("images", [])
 
         image_urls = []
 
@@ -41,11 +40,15 @@ async def upload_banner_data(request: Request, db: Session = Depends(get_db), cu
 
             return f"http://localhost:8000/images/{unique_filename}"
 
-        for file in files:
+        for file in images:
             filename = file["name"]
             base64_content = file["content"]
             image_url = save_base64_image(base64_content, filename)
             image_urls.append(image_url)
+
+        #banner_data.images = image_urls
+
+        #banner = Banner(**banner_data.model_dump())
 
         banner = Banner(
             userid=userid,
@@ -75,32 +78,34 @@ async def upload_banner_data(request: Request, db: Session = Depends(get_db), cu
 
 
 
-@router_banner.get("/banner/banners/", status_code=status.HTTP_200_OK)
+@router_banner.get("/banner/banners/", status_code=status.HTTP_200_OK, response_model=list[BannerResponse])
 async def get_all_banners(request:Request, db: Session = Depends(get_db), current_user: str = Depends(get_current_user)):
     try:
         banners = db.query(Banner).all()
         if not banners:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="No banners found.")
         
-        base_url = "http://localhost:8000/images"  # Base URL for serving images
-        banners_data = []
+        # base_url = "http://localhost:8000/images"  # Base URL for serving images
+        # banners_data = []
 
-        for banner in banners:
-            banner_info = {
-                "id": banner.id,
-                "userid": banner.userid,
-                # Generate URLs for images stored in the IMAGES_FOLDER
-                "images": [f"{base_url}/{os.path.basename(image)}" for image in banner.images],
-                "banner_name": banner.banner_name,
-                "banner_type": banner.banner_type,
-                "start_date": banner.start_date.isoformat() if banner.start_date else None,
-                "end_date": banner.end_date.isoformat() if banner.end_date else None,
-                "banner_meta_title": banner.banner_meta_title,
-                "youtube_link": banner.youtube_link
-            }
-            banners_data.append(banner_info)
+        # for banner in banners:
+        #     banner_info = {
+        #         "id": banner.id,
+        #         "userid": banner.userid,
+        #         # Generate URLs for images stored in the IMAGES_FOLDER
+        #         "images": [f"{base_url}/{os.path.basename(image)}" for image in banner.images],
+        #         "banner_name": banner.banner_name,
+        #         "banner_type": banner.banner_type,
+        #         "start_date": banner.start_date.isoformat() if banner.start_date else None,
+        #         "end_date": banner.end_date.isoformat() if banner.end_date else None,
+        #         "banner_meta_title": banner.banner_meta_title,
+        #         "youtube_link": banner.youtube_link
+        #     }
+        #     banners_data.append(banner_info)
 
-        return JSONResponse(content=banners_data, status_code=status.HTTP_200_OK)
+        # return JSONResponse(content=banners_data, status_code=status.HTTP_200_OK)
+
+        return banners
 
     except HTTPException as e:
         raise e
@@ -109,7 +114,7 @@ async def get_all_banners(request:Request, db: Session = Depends(get_db), curren
 
 
 
-@router_banner.get("/banner/{banner_id}", status_code=status.HTTP_200_OK)
+@router_banner.get("/banner/{banner_id}", status_code=status.HTTP_200_OK, response_model=BannerItemResponse)
 async def get_banner_by_id(banner_id: int, request: Request, db: Session = Depends(get_db), current_user: str = Depends(get_current_user)):
 
     banner = db.query(Banner).filter(Banner.id == banner_id).first()
@@ -155,7 +160,7 @@ async def update_banner(
         userid = form_data.get("userid")
         banner_meta_titles = form_data.get("banner_meta_title", [])
         youtube_links = form_data.get("youtube_links", [])
-        files = form_data.get("files", [])
+        images = form_data.get("images", [])
 
         image_urls = []
         
@@ -170,7 +175,7 @@ async def update_banner(
 
             return f"http://localhost:8000/images/{unique_filename}"
 
-        for file in files:
+        for file in images:
             filename = file["name"]
             base64_content = file["content"]
             image_url = save_base64_image(base64_content, filename)
@@ -205,14 +210,14 @@ async def update_banner(
 
 
 @router_banner.patch("/bannerdelete/{banner_id}", status_code=status.HTTP_204_NO_CONTENT)
-def delete_banner(banner_id: int, request: DeleteBannerRequest, db: Session = Depends(get_db), current_user: str = Depends(get_current_user)):
+def delete_banner(banner_id: int, banner_request: DeleteBannerRequest, db: Session = Depends(get_db), current_user: str = Depends(get_current_user)):
     try:
         banner = db.query(Banner).filter(Banner.id == banner_id).first()
         if not banner:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Banner not found.")
 
         banner.status = "inactive"
-        banner.deleted_by_user = int(request.userid)
+        banner.deleted_by_user = int(banner_request.userid)
         banner.deleted_at = datetime.now()
 
         #db.delete(banner)

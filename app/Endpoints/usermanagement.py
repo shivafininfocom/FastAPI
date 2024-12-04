@@ -3,7 +3,7 @@ from fastapi import Body, Depends, APIRouter, HTTPException, Request, status
 from sqlalchemy.orm import Session
 from app.database import get_db
 from app.models import Permission, UserManagement
-from app.schemas import UserPermissions
+from app.schemas import UserManagementPermissionsResponse, UserPermissions, UserPermissionsItemResponse, UserPermissionsUserId
 from app.Endpoints.token_handler import hash_password
 from app.Endpoints.token_handler import get_current_user
 
@@ -11,7 +11,7 @@ from app.Endpoints.token_handler import get_current_user
 router_userpermissions = APIRouter()
 
 
-@router_userpermissions.post("/createuserspermissions/")
+@router_userpermissions.post("/createuserspermissions/", status_code=status.HTTP_201_CREATED)
 async def create_user_with_permissions( user_permissions: UserPermissions, db: Session = Depends(get_db), current_user: str = Depends(get_current_user)):
     try:
         user_data = user_permissions.data
@@ -44,122 +44,40 @@ async def create_user_with_permissions( user_permissions: UserPermissions, db: S
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e))
 
 
-@router_userpermissions.get("/getalluserspermissions")
+@router_userpermissions.get("/getalluserspermissions", status_code=status.HTTP_200_OK, response_model=UserManagementPermissionsResponse)
 async def get_all_users_with_permissions(db: Session = Depends(get_db), current_user: str = Depends(get_current_user)):
 
-    users = db.query(UserManagement).all()
-    permissions = db.query(Permission).all()
+    try:
+        users = db.query(UserManagement).all()
+        permissions = db.query(Permission).all()
 
-    users_data = []
-    for user in users:
-        users_data.append({
-            "userid": user.userid,
-            "username": user.username,
-            "emailid": user.emailid,
-            "password": user.password,
-            "departmentname": user.departmentname,
-            "mobilenumber": user.mobilenumber,
-            "created_date": user.created_date
-        })
+        if not users or not permissions:
+            return {"message": "Not Found"}
 
-    permissions_data = []
-    for perm in permissions:
-        permissions_data.append({
-            "userid": perm.userid,
-            "username": perm.username,
-            "dashboard_view": perm.dashboard_view,
-            "dashboard_create": perm.dashboard_create,
-            "dashboard_update": perm.dashboard_update,
-            "dashboard_delete": perm.dashboard_delete,
-            "dashboard_download": perm.dashboard_download,
-            "notification_view": perm.notification_view,
-            "notification_create": perm.notification_create,
-            "notification_update": perm.notification_update,
-            "notification_delete": perm.notification_delete,
-            "notification_download": perm.notification_download,
-            "banner_view": perm.banner_view,
-            "banner_create": perm.banner_create,
-            "banner_update": perm.banner_update,
-            "banner_delete": perm.banner_delete,
-            "banner_download": perm.banner_download,
-            "reports_view": perm.reports_view,
-            "reports_create": perm.reports_create,
-            "reports_update": perm.reports_update,
-            "reports_delete": perm.reports_delete,
-            "reports_download": perm.reports_download,
-            "logs_view": perm.logs_view,
-            "logs_create": perm.logs_create,
-            "logs_update": perm.logs_update,
-            "logs_delete": perm.logs_delete,
-            "logs_download": perm.logs_download,
-            "usermanagement_view": perm.usermanagement_view,
-            "usermanagement_create": perm.usermanagement_create,
-            "usermanagement_update": perm.usermanagement_update,
-            "usermanagement_delete": perm.usermanagement_delete,
-            "usermanagement_download": perm.usermanagement_download
-        })
-
-    return {
-        "users": users_data,
-        "permissions": permissions_data
-    }
+        return {
+            "users": users,
+            "permissions": permissions
+        }
+        
+    except Exception as e:
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=f"Unexpected error occured {str(e)}")
 
 
-@router_userpermissions.get("/userspermissions/{userid}")
-async def get_user(userid: int, request: Request, db: Session = Depends(get_db), current_user: str = Depends(get_current_user)):
+@router_userpermissions.get("/userspermissions/{userid}", status_code=status.HTTP_200_OK, response_model=UserPermissionsItemResponse)
+async def get_user(userid: int,db: Session = Depends(get_db), current_user: str = Depends(get_current_user)):
     try:
 
         user = db.query(UserManagement).filter(UserManagement.userid == userid).first()
         if not user:
             raise HTTPException(status_code=404, detail="User not found")
 
-        permission = db.query(Permission).filter(Permission.userid == userid).first()
-        if not permission:
+        permissions = db.query(Permission).filter(Permission.userid == userid).first()
+        if not permissions:
             raise HTTPException(status_code=404, detail="Permission not found")
 
         return {
-            'user': {
-                "userid": user.userid,
-                "username": user.username,
-                "emailid": user.emailid,
-                "departmentname": user.departmentname,
-                "mobilenumber": user.mobilenumber,
-                "created_date": user.created_date
-            },
-            'permission': {
-                "userid": permission.userid,
-                "username": user.username,
-                "dashboard_view": permission.dashboard_view,
-                "dashboard_create": permission.dashboard_create,
-                "dashboard_update": permission.dashboard_update,
-                "dashboard_delete": permission.dashboard_delete,
-                "dashboard_download": permission.dashboard_download,
-                "notification_view": permission.notification_view,
-                "notification_create": permission.notification_create,
-                "notification_update": permission.notification_update,
-                "notification_delete": permission.notification_delete,
-                "notification_download": permission.notification_download,
-                "banner_view": permission.banner_view,
-                "banner_create": permission.banner_create,
-                "banner_update": permission.banner_update,
-                "banner_delete": permission.banner_delete,
-                "banner_download": permission.banner_download,
-                "reports_view": permission.reports_view,
-                "reports_create": permission.reports_create,
-                "reports_update": permission.reports_update,
-                "reports_delete": permission.reports_delete,
-                "reports_download": permission.reports_download,
-                "logs_view": permission.logs_view,
-                "logs_create": permission.logs_create,
-                "logs_update": permission.logs_update,
-                "logs_delete": permission.logs_delete,
-                "logs_download": permission.logs_download,
-                "usermanagement_view": permission.usermanagement_view,
-                "usermanagement_create": permission.usermanagement_create,
-                "usermanagement_update": permission.usermanagement_update,
-                "usermanagement_delete": permission.usermanagement_delete,
-                "usermanagement_download": permission.usermanagement_download
-            }
+            "user": user,
+            "permissions": permissions
         }
 
     except Exception as e:
@@ -220,58 +138,15 @@ async def update_user_permissions(userid: int, request: Request, db: Session = D
         permission.usermanagement_download = permission_data.get("usermanagement_download")
 
         db.commit()
-
-        return {
-                "user": {
-                    "userid": user.userid,
-                    "username": user.username,
-                    "emailid": user.emailid,
-                    "departmentname": user.departmentname,
-                    "mobilenumber": user.mobilenumber,
-                    "created_date": user.created_date
-                },
-                "permission": {
-                    "userid": permission.userid,
-                    "username": permission.username,
-                    "dashboard_view": permission.dashboard_view,
-                    "dashboard_create": permission.dashboard_create,
-                    "dashboard_update": permission.dashboard_update,
-                    "dashboard_delete": permission.dashboard_delete,
-                    "dashboard_download": permission.dashboard_download,
-                    "notification_view": permission.notification_view,
-                    "notification_create": permission.notification_create,
-                    "notification_update": permission.notification_update,
-                    "notification_delete": permission.notification_delete,
-                    "notification_download": permission.notification_download,
-                    "banner_view": permission.banner_view,
-                    "banner_create": permission.banner_create,
-                    "banner_update": permission.banner_update,
-                    "banner_delete": permission.banner_delete,
-                    "banner_download": permission.banner_download,
-                    "reports_view": permission.reports_view,
-                    "reports_create": permission.reports_create,
-                    "reports_update": permission.reports_update,
-                    "reports_delete": permission.reports_delete,
-                    "reports_download": permission.reports_download,
-                    "logs_view": permission.logs_view,
-                    "logs_create": permission.logs_create,
-                    "logs_update": permission.logs_update,
-                    "logs_delete": permission.logs_delete,
-                    "logs_download": permission.logs_download,
-                    "usermanagement_view": permission.usermanagement_view,
-                    "usermanagement_create": permission.usermanagement_create,
-                    "usermanagement_update": permission.usermanagement_update,
-                    "usermanagement_delete": permission.usermanagement_delete,
-                    "usermanagement_download": permission.usermanagement_download
-                }
-            }
+        return {"success": "user and permissions updated successfully"}
+        
     except Exception as e:
         db.rollback()
         raise HTTPException(status_code=500, detail=f"Internal server error {str(e)}")
 
 
-@router_userpermissions.patch("/deleteuserpermission/{user_id}")
-async def delete_user(user_id: int, db: Session = Depends(get_db),  current_user: str = Depends(get_current_user)):
+@router_userpermissions.patch("/deleteuserpermission/{user_id}", status_code=status.HTTP_204_NO_CONTENT)
+async def delete_user(user_id: int, userpermissions_userid: UserPermissionsUserId, db: Session = Depends(get_db),  current_user: str = Depends(get_current_user)):
     try:
         user = db.query(UserManagement).filter(UserManagement.userid == user_id).first()
         if user is None:
@@ -282,10 +157,8 @@ async def delete_user(user_id: int, db: Session = Depends(get_db),  current_user
             raise HTTPException(status_code=404, detail="Permission not found for this user")
 
         user.status = "inactive"
-        user.deleted_by_user = 4
+        user.deleted_by_user = userpermissions_userid
         user.deleted_at = datetime.now()
-        # db.delete(user)
-        # db.delete(permission)
         db.commit()
 
         return {"message": "User and related permissions deleted successfully."}
