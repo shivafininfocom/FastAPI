@@ -8,8 +8,6 @@ from passlib.context import CryptContext
 
 SECRET_KEY = "bf27c34a99a7246b8a653f8340e6bfe3509eb80837d557b68cb2e1b6f6922c5bed1c54ed46050ac67311c09c19c95d409172176d21109e42b9a140ac776f177b"
 ALGORITHM = "HS256"
-ACCESS_TOKEN_EXPIRE_MINUTES = 30
-RESET_TOKEN_EXPIRE_MINUTES = 10
 
 
 
@@ -19,14 +17,8 @@ pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 
 def create_access_token(data: dict, expires_delta: Optional[timedelta] = None):
+
     to_encode = data.copy()
-
-    if(expires_delta):
-        expires = datetime.utcnow() + expires_delta
-    else:
-        expires = datetime.utcnow() + timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
-
-    to_encode.update({"exp": expires})
 
     encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
     return encoded_jwt
@@ -39,20 +31,6 @@ def verify_access_token(token: str):
     except PyJWTError:
         raise HTTPException(status_code=401, detail="Invalid or expired token")
     
-
-def create_reset_token(data: dict,  expires_delta: Optional[timedelta] = None):
-    to_encode = data.copy()
-    expire = datetime.utcnow() + RESET_TOKEN_EXPIRE_MINUTES
-    to_encode.update({"exp": expire})
-    return jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
-
-def verify_reset_token(token: str):
-    try:
-        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
-        return payload.get("sub")
-    except PyJWTError as e:
-        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=f"{str(e)}")
-
 
 def hash_password(password):
     return pwd_context.hash(password)

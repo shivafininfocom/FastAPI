@@ -5,7 +5,7 @@ from app.database import get_db
 from app.models import Notification
 from sqlalchemy.exc import NoResultFound
 from app.Endpoints.token_handler import get_current_user
-from app.schemas import NotificationCreate, NotificationItem, NotificationResponse, NotificationUserId
+from app.schemas import NotificationCreate, NotificationItem, NotificationResponse, NotificationUpdateCreate, NotificationUserId
 
 
 
@@ -36,7 +36,7 @@ async def create_notification(notification_data: NotificationCreate, db: Session
 @router_notification.get("/notifications/", response_model=list[NotificationResponse])
 async def read_notifications(db=Depends(get_db), current_user: str = Depends(get_current_user)):
     try:
-        notifications = db.query(Notification).all()
+        notifications = db.query(Notification).filter(Notification.status == 'active').all()
 
         if notifications is None:
             return {"message": "There are no notifications"}
@@ -54,7 +54,7 @@ async def read_notifications(db=Depends(get_db), current_user: str = Depends(get
 @router_notification.get("/notification/{notification_id}", response_model=NotificationItem)
 async def get_notification_by_id(notification_id: int, db: Session = Depends(get_db), current_user: str = Depends(get_current_user)):
     try:
-        notification = db.query(Notification).filter(Notification.id == notification_id).first()
+        notification = db.query(Notification).filter(Notification.id == notification_id, Notification.status == 'active').first()
 
         if not notification:
             raise HTTPException(status_code=404, detail="Bad request, notification not found")
@@ -66,9 +66,10 @@ async def get_notification_by_id(notification_id: int, db: Session = Depends(get
 
 
 @router_notification.put("/notifications/{notification_id}/")
-async def update_notification(notification_id: int, notification_data: NotificationCreate, db: Session = Depends(get_db),  current_user: str = Depends(get_current_user)):
+async def update_notification(notification_id: int, notification_data: NotificationUpdateCreate, db: Session = Depends(get_db),  current_user: str = Depends(get_current_user)):
+    
     try:
-        notification = db.query(Notification).filter(Notification.id == notification_id).one()
+        notification = db.query(Notification).filter(Notification.id == notification_id).first()
     except NoResultFound:
         raise HTTPException(status_code=404, detail="Notification not found")
 
@@ -76,11 +77,13 @@ async def update_notification(notification_id: int, notification_data: Notificat
         notification.userid = notification_data.userid
         notification.notification_title = notification_data.notification_title
         notification.description = notification_data.description
+        notification.created_date = datetime.now()
 
         db.commit()
-        db.refresh(notification_data)
+        db.refresh(notification)
 
         return {"message": "Notification updated successfully"}
+    
     except Exception as e:
         db.rollback()
         raise HTTPException(status_code=500, detail=f"Internal server error f{str(e)}")
@@ -97,9 +100,8 @@ async def delete_notification(notification_id: int, notification_userid: Notific
         notification.deleted_by_user = notification_userid.userid
         notification.deleted_at = datetime.now()
 
-        #db.delete(notification)
         db.commit()
-        return {"message": f"Notification with ID {notification_id} deleted successfully"}
+        return {"message": f"Notification deleted successfully"}
     except Exception as e:
         db.rollback()
         raise HTTPException(status_code=500, detail=f"Internal server error {str(e)}")

@@ -38,13 +38,16 @@ class UserManagement(Base):
     username = Column(String(100), nullable=False)
     emailid = Column(String(100), unique=True, nullable=False)
     departmentname = Column(String(100), nullable=True)
-    password = Column(String(255), nullable=False)  # Store hashed passwords
+    password = Column(String(255), nullable=False)
     mobilenumber = Column(String(15), nullable=True)
     created_date = Column(DateTime, default=datetime.now(), nullable=True)
 
     status = Column(String(10), default="active")
-    deleted_by_user = Column(Integer, default=None, nullable=True)  # Can reference another user ID
+    deleted_by_user = Column(Integer, default=None, nullable=True) 
     deleted_at = Column(DateTime, default=None, nullable=True)
+
+    otp = Column(String(10), nullable=True)
+    access_token = Column(String(100), nullable=True)
 
     # Relationship with Permission model
     permissions = relationship("Permission", back_populates="user")
@@ -108,7 +111,7 @@ class Banner(Base):
     __tablename__ = "banners"
 
     id = Column(Integer, primary_key=True, index=True)
-    userid = Column(Integer)
+    userid = Column(Integer, nullable=False)
     banner_name = Column(String(255), nullable=False)
     banner_type = Column(String(50), nullable=False)
     start_date = Column(Date, nullable=False)
@@ -182,6 +185,8 @@ class Notification(Base):
     status = Column(String(10), default="active")
     deleted_by_user = Column(Integer, default=None, nullable=True)  # Can reference another user ID
     deleted_at = Column(DateTime, default=None, nullable=True)
+
+    otp_push_notification = Column(String(8), nullable=True)
 
 
 

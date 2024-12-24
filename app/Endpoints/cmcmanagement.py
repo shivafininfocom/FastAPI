@@ -6,7 +6,7 @@ from sqlalchemy.orm import Session
 from app.database import get_db
 from app.models import ContentManagement
 from app.Endpoints.token_handler import get_current_user
-from app.schemas import ContentManagementCreate, ContentManagementResponse, ContentManagementResponseUpdated, ContentManagementUpdate
+from app.schemas import ContentManagementCreate, ContentManagementResponse, ContentManagementResponseUpdated, ContentManagementUpdate, ContentManagementUserID
 
 
 
@@ -38,16 +38,18 @@ async def create_content(content: ContentManagementCreate, db:Session = Depends(
         db.add(content_banner)
         db.commit()
         db.refresh(content_banner)
-        return content_banner
+
+        return {"message": "Content saved successfully"}
+
     except Exception as e:
         db.rollback()
         raise HTTPException(status_code=500, detail=f"Something went wrong {str(e)}")
-    
+
 
 @router_content.get("/contents",  response_model=list[ContentManagementResponse])
-async def get_all_content(db:Session = Depends(get_db),  current_user: str = Depends(get_current_user)):
+async def get_all_content(db:Session = Depends(get_db), current_user: str = Depends(get_current_user)):
     try:
-        content_list = db.query(ContentManagement).all()
+        content_list = db.query(ContentManagement).filter(ContentManagement.status == 'active').all()
 
         if not content_list:
             raise HTTPException(status_code=404, detail="Bad request, Content does not found")
@@ -88,18 +90,17 @@ def update_content(contentid:int, content_update: ContentManagementUpdate, db:Se
         content.userid = content_update.userid
         
         db.commit()
-        db.refresh(content)
 
-        return content
+        return {"message": "Content updated successfully"}
     except Exception as e:
         db.rollback()
         raise HTTPException(status_code=500, detail=f"Internal server error {str(e)}")
 
 
 @router_content.get("/content/{contentid}", response_model=ContentManagementResponse)
-async def get_content_id(contentid:int, db: Session = Depends(get_db),  current_user: str = Depends(get_current_user)):
+async def get_content_id(contentid:int, db: Session = Depends(get_db), current_user: str = Depends(get_current_user)):
     try:
-        content = db.query(ContentManagement).filter(ContentManagement.id == contentid).first()
+        content = db.query(ContentManagement).filter(ContentManagement.id == contentid, ContentManagement.status == 'active').first()
 
         if not content:
             raise HTTPException(status_code=400, detail="Bad request, content does not found")
@@ -109,8 +110,8 @@ async def get_content_id(contentid:int, db: Session = Depends(get_db),  current_
         raise HTTPException(status_code=500, detail=f"Internal server error {str(e)}")
 
 
-@router_content.patch("/contentRemove/{contentid}")
-async def remove_content(contentid: int, db: Session = Depends(get_db), current_user: str = Depends(get_current_user)):
+@router_content.patch("/deletecontent/{contentid}")
+async def remove_content(contentid: int, content_userid: ContentManagementUserID, db: Session = Depends(get_db), current_user: str = Depends(get_current_user)):
     try:
         content = db.query(ContentManagement).filter(ContentManagement.id == contentid).first()
 
@@ -118,7 +119,7 @@ async def remove_content(contentid: int, db: Session = Depends(get_db), current_
             raise HTTPException(status_code=404, detail="Bad Request, Content does not found")
 
         content.status = "inactive"
-        content.deleted_by_user = contentid
+        content.deleted_by_user = content_userid.userid
         content.deleted_at = datetime.now()
 
         db.commit()

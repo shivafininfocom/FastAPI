@@ -10,12 +10,35 @@ class LoginRequest(BaseModel):
     email: str
     password: str
 
+class LogoutUser(BaseModel):
+    userid: int
+    access_token: str
+
+
+class OTPRequest(BaseModel):
+    mobile_number: str
+
+class PasswordRequest(BaseModel):
+    otp: str
+    email: str
+    reset_password: str
+
+
+class OTPRequestNotification(BaseModel):
+    email_id: str
+    userid: int
+
+class NotificationData(BaseModel):
+    userid: int
+    notification_title: str
+    notification_description: str
+    request_otp: str
 
 #-----------------------------------------
 #Reset password schema
 #-----------------------------------------
 
-class PasswordResetRequest(BaseModel):
+class OTPRequest(BaseModel):
     email: str
 
 class PasswordReset(BaseModel):
@@ -63,6 +86,7 @@ class UserManagementBase(BaseModel):
 
 class UserManagementResponse(BaseModel):
     username: str
+    created_date: datetime | None
     emailid: str
     departmentname: str
     mobilenumber: str
@@ -144,10 +168,6 @@ class UserPermissionsUserId(BaseModel):
 
 
 #---------------------------------------
-class OTPRequest(BaseModel):
-    mobile_number: str
-
-
 
 class DeleteBannerRequest(BaseModel):
     userid: int
@@ -169,7 +189,6 @@ class ContentManagementResponse(ContentManagementBase):
     created_at: datetime
     id: int
     image: str
-    status: str
 
     class Config:
         form_attributes = True
@@ -185,6 +204,10 @@ class ContentManagementResponseUpdated(ContentManagementBase):
         form_attributes = True
 
 
+class ContentManagementUserID(BaseModel):
+    userid: int
+
+
 #--------------------------------------
 #Notification schemas
 #--------------------------------------
@@ -196,6 +219,12 @@ class NotificationBase(BaseModel):
 
 class NotificationCreate(NotificationBase):
     userid: int
+
+class NotificationUpdateCreate(BaseModel):
+    userid: int
+    notification_title: str
+    description: str
+    
 
 class NotificationResponse(NotificationCreate):
     created_date: datetime

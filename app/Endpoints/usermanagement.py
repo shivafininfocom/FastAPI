@@ -44,7 +44,7 @@ async def create_user_with_permissions( user_permissions: UserPermissions, db: S
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e))
 
 
-@router_userpermissions.get("/getalluserspermissions", status_code=status.HTTP_200_OK, response_model=UserManagementPermissionsResponse)
+@router_userpermissions.get("/getalluserspermissions/", status_code=status.HTTP_200_OK, response_model=UserManagementPermissionsResponse)
 async def get_all_users_with_permissions(db: Session = Depends(get_db), current_user: str = Depends(get_current_user)):
 
     try:
@@ -157,7 +157,7 @@ async def delete_user(user_id: int, userpermissions_userid: UserPermissionsUserI
             raise HTTPException(status_code=404, detail="Permission not found for this user")
 
         user.status = "inactive"
-        user.deleted_by_user = userpermissions_userid
+        user.deleted_by_user = userpermissions_userid.userid
         user.deleted_at = datetime.now()
         db.commit()
 

@@ -16,6 +16,8 @@ from app.Endpoints.notifications import router_notification
 from app.Endpoints.cmcmanagement import router_content
 from app.Endpoints.department import router_department
 from app.Endpoints.auth_user import router_login
+from app.Endpoints.push_notification import push_notification_router
+
 
 app = FastAPI(title="Metro users management", description="API for users management")
 
@@ -50,7 +52,7 @@ app.include_router(router_notification, tags=["Notifications"])
 app.include_router(router_content, tags=["Content Management"])
 app.include_router(router_department, tags=["Department"])
 app.include_router(router_login, tags=["User authentication"])
-
+app.include_router(push_notification_router, tags=["Send push notifications"])
 
 
 

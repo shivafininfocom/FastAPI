@@ -1,0 +1,13 @@
+{
+  "type": "service_account",
+  "project_id": "flutter-notifications-b8050",
+  "private_key_id": "fb42b6070bb17810c407dc2663554e5df5479e16",
+  "private_key": "-----BEGIN PRIVATE KEY-----\nMIIEvAIBADANBgkqhkiG9w0BAQEFAASCBKYwggSiAgEAAoIBAQCsBClNaComnVlY\ngXofWhM1uHHXMz3JXsbfNgjBW2Nb3Z4jbinrZPmAymCmLoT6sMIrJosyMfTqMQs+\noAwNCMnTkFyHYH8CfYZSE4U8ziH58R4W+seggTfldeV/C5bNZNkBdvRpJU+l+M7D\nuS8iPDEsqRUCmwABiFYlLIqjA0T3EdLzScdznV2QHoTq6G7qnM6JqgKyT8U+CHoB\nLbvyQWpd7bLsJa1M0Visifd5p0cGdHi1ZBTlzprquJ2TOt4k4fkSB42FI6cEBplU\nwldELl6zEJdOWhBd+s5IjRXG5BuuICps5cNKLg2f7QqKLl0NhrarvQm+7CGT59EU\ndT4q7ZNbAgMBAAECggEAB8sEG0g0dQZOF77xkRINcGE/ifxa24UAESeliM56BeNv\ntZBNkj5are5Os1uV/lhtJ+gINxfETjZlgjNdTMQN46PU2PSHTIghH4pvOKyLJYOu\nmx4X+Yu+OIsQo7nsgImouyz7vD2Qfo+47lXMV2eghZuh9Assjrar+SsrydSnXEuJ\nHnh1JBvP6u2ncelNPc3oCYZCsgXl+piEsIF0G4Fc4r928Y9YFaQTFMnryLgBT9Sc\nngOG6DM8Ft8klaN4w9LtKvOFY8LJWgqvBqIgDpx4KbGKD56tJz/3hZx4WuL394Ft\n6f5VesIt/nwrr004pmoRWAOdI8+6kAt38lmueNruAQKBgQDqBX2p2T7rN8Y18ySh\nE6IucgadaZbERqb62+3bhawY3Kglk+oQpI+J607vc8JHu+7r48fYrn6UzWds2PXa\nAotg+sm1ip2TrjToW7gD0JU7Vhb899ZayAoTy4qawI5DKf/9tTkKY+67IdUz+IJl\nGb98rhE9IBQE34STmZtG4/FvQQKBgQC8K+XT1600N6IhCpM/go4kC36ZZnUHkhUW\nZlem/wiKHpqX4pYEwmxiyyVZID/fSyPAc2mVOGnVhfpjc+BiWVPH5kVe1BnHe5jJ\neLy+zfnP5viW4hlCwq3VELdIUbRRc7ugpjCDsVIp1Smt4vSeUCliIb0p4i3QyVA1\nnDJHswh3mwKBgGQnlXBrmZHxfNL6DGMjk/Vst4gG+I9n7W7PUSzyOIUraosqkrIs\nu4G7Qz0Xvb4VoFs0UQNbKrFkdy8Oa6myDRSkQE+B046wr9QB7O81BakvXwdEymhv\n1GBEbD1uy3PTNcvPE2pu+mz8PdLQOH4sVtd1Z8tRP0AWqRbCVsIwK9QBAoGAJOsP\n6mI0TzxjCMyEWz+IF7ZRnlMlvtiAXqaxp8f9quuaNRZ1jHWAwllM+JGFNpANcaKz\nIl2xFf11RLHlYiZYc63QCmzeqe6r6UtQ7LaIvqt4NlIh1qFPbbAb5YpyMFDejQRO\nHGhb0G1MAhu3FqBvnhs0e9UuW/pDTGFa1ApiLOUCgYBQz1UMj10am1bergFJZu9g\nuS78IdO/Aa/uEQ8bx+bwj1KnpPBAO9xYsTCjOr+tCAUXVZtvlZH4uWXtmkxlSMXl\nTQIaJcPMKJyn9HnlB6QpGki/XdKYDyaaHWvqYLiMo+glOukXybBNzME7z9bE8G8+\nslm+utGo517vFb5Z5LE9MA==\n-----END PRIVATE KEY-----\n",
+  "client_email": "push-notifications-demo@flutter-notifications-b8050.iam.gserviceaccount.com",
+  "client_id": "106755439145153265668",
+  "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+  "token_uri": "https://oauth2.googleapis.com/token",
+  "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+  "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/push-notifications-demo%40flutter-notifications-b8050.iam.gserviceaccount.com",
+  "universe_domain": "googleapis.com"
+}
